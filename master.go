@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"time"
 )
 
 func main() {
@@ -24,6 +25,7 @@ func main() {
 	go scan(bufio.NewScanner(cmdStdout))
 	go scan(bufio.NewScanner(cmdStderr))
 
+	fmt.Println("master: starting lidar-scan...")
 	err = command.Start()
 	if err != nil {
 		log.Fatalln("master: failed to run command:", err)
@@ -38,6 +40,7 @@ func main() {
 
 func scan(scanner *bufio.Scanner) {
 	for scanner.Scan() {
-		fmt.Printf("master: from command: %s\n", scanner.Text())
+		t := time.Now().UnixNano()
+		fmt.Printf("%d: %s\n", t, scanner.Text())
 	}
 }
