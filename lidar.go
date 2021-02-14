@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"strconv"
 	"syscall"
-	"time"
 
 	"github.com/pkg/errors"
 )
@@ -19,8 +18,9 @@ var (
 	lidarChan chan struct{}
 )
 
-// StartLidar runs lidar-scan.
-func StartLidar() error {
+// StartLidar runs lidar-scan and returns its pid.
+// If there is an error, it returns pid=-1.
+func StartLidar() (pid int, err error) {
 	lidarChan = make(chan struct{}, 0)
 
 	command := exec.Command("lidar-scan", "/dev/ttyUSB0")
@@ -32,12 +32,12 @@ func StartLidar() error {
 
 	cmdStderr, err := command.StderrPipe()
 	if err != nil {
-		return errors.Wrap(err, "failed to connect to lidar-scan's stderr")
+		return -1, errors.Wrap(err, "failed to connect to lidar-scan's stderr")
 	}
 
 	logFile, err := os.Create("lidar-scan.log")
 	if err != nil {
-		return errors.Wrap(err, "failed to create lidar-scan log file")
+		return -1, errors.Wrap(err, "failed to create lidar-scan log file")
 	}
 
 	go scan(logFile, bufio.NewScanner(cmdStdout))
@@ -45,26 +45,25 @@ func StartLidar() error {
 
 	err = command.Start()
 	if err != nil {
-		return errors.Wrapf(err, "failed to start lidar-scan")
+		return -1, errors.Wrapf(err, "failed to start lidar-scan")
 	}
-	log.Printf("started lidar-scan (pid %d)", command.Process.Pid)
+	pid = command.Process.Pid
 
 	pidFile, err := os.Create("lidar-scan.pid")
 	if err != nil {
-		return errors.Wrap(err, "failed to create lidar-scan pid file")
+		return -1, errors.Wrap(err, "failed to create lidar-scan pid file")
 	}
 	defer pidFile.Close()
 
-	n, err := fmt.Fprintf(pidFile, "%d", command.Process.Pid)
+	_, err = fmt.Fprintf(pidFile, "%d", pid)
 	if err != nil {
-		return errors.Wrap(err, "failed to write lidar-scan pid to file")
+		return -1, errors.Wrap(err, "failed to write lidar-scan pid to file")
 	}
-	log.Printf("wrote lidar-scan pid (%d) to file (%d bytes)", command.Process.Pid, n)
 
-	return nil
+	return pid, nil
 }
 
-// StopLidar sends SIGINT to lidar-scan (if running).
+// StopLidar sends SIGINT to lidar-scan.
 func StopLidar() error {
 	pidFile, err := os.Open("lidar-scan.pid")
 	if err != nil {
@@ -87,15 +86,12 @@ func StopLidar() error {
 		return errors.Wrapf(err, "failed to send SIGINT to lidar-scan (pid %d)", pid)
 	}
 
-	log.Print("stopped lidar-scan")
-
 	return nil
 }
 
 func scan(w io.Writer, scanner *bufio.Scanner) {
 	// TODO: Add channel to signal end of scanning (sync and close files)
 	for scanner.Scan() {
-		t := time.Now().UnixNano()
-		fmt.Fprintf(w, "%d: %s\n", t, scanner.Text())
+		fmt.Fprintf(w, "%s\n", scanner.Text())
 	}
 }

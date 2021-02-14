@@ -64,21 +64,25 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 func handleLidar(w http.ResponseWriter, req *http.Request) {
 	lidarCmd := req.URL.Query().Get("lidar")
 
-	action := "did nothing with"
+	action := "did nothing with lidar-scan"
 
 	if lidarCmd == "0" {
-		action = "stopped"
 		err := StopLidar()
 		if err != nil {
 			log.Print(err)
+		} else {
+			action = "stopped lidar-scan"
 		}
+
 	} else if lidarCmd == "1" {
-		action = "started"
-		err := StartLidar()
+		pid, err := StartLidar()
 		if err != nil {
 			log.Print(err)
+		} else {
+			action = fmt.Sprintf("started lidar-scan (pid %d)", pid)
 		}
 	}
 
-	fmt.Fprintln(w, action+" lidar-scan")
+	log.Print(action)
+	fmt.Fprintln(w, action)
 }
