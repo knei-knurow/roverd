@@ -1,6 +1,12 @@
+# generated binaries
 /master
 /roverd
+
+# log files
 roverd.log
-roverd.pid
 lidar-scan.log
+log.txt
+
+# pid files
+roverd.pid
 lidar-scan.pid
