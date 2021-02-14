@@ -1,4 +1,4 @@
-module github.com/bartekpacia/rovermaster
+module github.com/knei-knurow/roverd
 
 go 1.15
 
