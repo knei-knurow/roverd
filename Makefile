@@ -1,7 +1,7 @@
 all: roverd
 
-roverd: ./roverd.go ./lidar.go
-	go build ./roverd.go ./lidar.go
+roverd: ./roverd.go ./lidar.go ./head.go
+	go build ./roverd.go ./lidar.go ./head.go
 
 install:
 	cp ./roverd /usr/local/bin

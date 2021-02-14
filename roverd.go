@@ -55,6 +55,7 @@ func listenSignals() {
 func serveHTTP() {
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/lidar", handleLidar)
+	http.HandleFunc("/head", handleHead)
 	http.ListenAndServe("127.0.0.1:8080", nil)
 }
 
@@ -64,11 +65,11 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleLidar(w http.ResponseWriter, req *http.Request) {
-	lidarCmd := req.URL.Query().Get("state")
+	lidarState := req.URL.Query().Get("state")
 
 	msg := ""
 
-	if lidarCmd == "0" {
+	if lidarState == "0" {
 		err := StopLidar()
 		if err != nil {
 			msg = fmt.Sprint("failed to stop lidar-scan:", err)
@@ -76,13 +77,30 @@ func handleLidar(w http.ResponseWriter, req *http.Request) {
 			msg = "stopped lidar-scan"
 		}
 
-	} else if lidarCmd == "1" {
+	} else if lidarState == "1" {
 		pid, err := StartLidar()
 		if err != nil {
 			msg = fmt.Sprint("failed to start lidar-scan:", err)
 		} else {
 			msg = fmt.Sprintf("started lidar-scan (pid %d)", pid)
 		}
+	}
+
+	log.Print(msg)
+	fmt.Fprintln(w, msg)
+}
+
+func handleHead(w http.ResponseWriter, req *http.Request) {
+	host := req.URL.Query().Get("host")
+	port := req.URL.Query().Get("port")
+	red := req.URL.Query().Get("red")
+	green := req.URL.Query().Get("green")
+
+	msg := fmt.Sprintf("blink (red=%s, green=%s)", red, green)
+
+	err := Blink(host, port, red, green)
+	if err != nil {
+		msg = fmt.Sprintln("failed to blink:", err)
 	}
 
 	log.Print(msg)
