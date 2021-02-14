@@ -67,7 +67,7 @@ func StartLidar() (pid int, err error) {
 func StopLidar() error {
 	pidFile, err := os.Open("lidar-scan.pid")
 	if err != nil {
-		return errors.Wrap(err, "failed to open lidar-scan pid file")
+		return errors.Wrap(err, "failed open lidar-scan pid file")
 	}
 	defer pidFile.Close()
 

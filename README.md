@@ -15,7 +15,7 @@ Main program for Knurów Rover. Runs as a daemon.
 2. Start `lidar-scan`:
 
    ```
-   $ curl "localhost:8080/lidar?lidar=1"
+   $ curl "localhost:8080/lidar?state=1"
    ```
 
    You should see `lidar-scan.pid` and `lidar-scan.log` file being created.
@@ -24,21 +24,15 @@ Main program for Knurów Rover. Runs as a daemon.
 3. Stop `lidar-scan`:
 
    ```
-   $ curl "localhost:8080/lidar?lidar=0"
+   $ curl "localhost:8080/lidar?state=0"
    ```
 
 4. Stop daemon:
 
-   - using SIGINT:
+   - using SIGTERM:
 
    ```
-   $ kill -2 $(cat roverd.pid)
-   ```
-
-   - using SIGKILL:
-
-   ```
-   $ kill -9 $(cat roverd.pid)
+   $ kill $(cat roverd.pid)
    ```
 
    - or just use `top`/`htop` (especially useful if you remove `roverd.pid` file)

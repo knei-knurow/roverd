@@ -6,12 +6,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/sevlyar/go-daemon"
 )
 
 var (
-	sigChan = make(chan os.Signal, 1)
+	signals = make(chan os.Signal, 1)
 )
 
 // To terminate the daemon use:
@@ -37,15 +38,16 @@ func main() {
 
 	log.Print("- - - - - - - - - - - - - - -")
 	log.Print("daemon started")
-	signal.Notify(sigChan, os.Interrupt)
-	go listenInterrupt()
+
+	signal.Notify(signals, syscall.SIGTERM, syscall.SIGINT)
+	go listenSignals()
 
 	serveHTTP()
 }
 
-func listenInterrupt() {
-	for sig := range sigChan {
-		log.Printf("dameon stopped by %s", sig.String())
+func listenSignals() {
+	for sig := range signals {
+		log.Printf("dameon stopped: %s", sig.String())
 		os.Exit(0)
 	}
 }
@@ -62,27 +64,27 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleLidar(w http.ResponseWriter, req *http.Request) {
-	lidarCmd := req.URL.Query().Get("lidar")
+	lidarCmd := req.URL.Query().Get("state")
 
-	action := "did nothing with lidar-scan"
+	msg := ""
 
 	if lidarCmd == "0" {
 		err := StopLidar()
 		if err != nil {
-			log.Print(err)
+			msg = fmt.Sprint("failed to stop lidar-scan:", err)
 		} else {
-			action = "stopped lidar-scan"
+			msg = "stopped lidar-scan"
 		}
 
 	} else if lidarCmd == "1" {
 		pid, err := StartLidar()
 		if err != nil {
-			log.Print(err)
+			msg = fmt.Sprint("failed to start lidar-scan:", err)
 		} else {
-			action = fmt.Sprintf("started lidar-scan (pid %d)", pid)
+			msg = fmt.Sprintf("started lidar-scan (pid %d)", pid)
 		}
 	}
 
-	log.Print(action)
-	fmt.Fprintln(w, action)
+	log.Print(msg)
+	fmt.Fprintln(w, msg)
 }
