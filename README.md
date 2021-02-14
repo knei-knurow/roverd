@@ -1,6 +1,6 @@
 > early proof of concept
 
-### roverd
+# roverd
 
 Main program for Knurów Rover. Runs as a daemon.
 
