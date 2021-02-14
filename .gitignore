@@ -2,3 +2,5 @@
 /roverd
 roverd.log
 roverd.pid
+lidar-scan.log
+lidar-scan.pid

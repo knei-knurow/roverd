@@ -51,11 +51,28 @@ func listenInterrupt() {
 }
 
 func serveHTTP() {
-	http.HandleFunc("/", httpHandler)
+	http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/lidar", handleLidar)
 	http.ListenAndServe("127.0.0.1:8080", nil)
 }
 
-func httpHandler(w http.ResponseWriter, req *http.Request) {
+func handleIndex(w http.ResponseWriter, req *http.Request) {
 	log.Printf("request from %s: %s %q", req.RemoteAddr, req.Method, req.URL)
 	fmt.Fprintln(w, "hello from roverd!")
+}
+
+func handleLidar(w http.ResponseWriter, req *http.Request) {
+	lidarCmd := req.URL.Query().Get("lidar")
+
+	action := "did nothing with"
+
+	if lidarCmd == "0" {
+		action = "stopped"
+		go StopLidar()
+	} else if lidarCmd == "1" {
+		action = "started"
+		go StartLidar()
+	}
+
+	fmt.Fprintln(w, action+" lidar-scan")
 }
