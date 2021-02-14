@@ -68,10 +68,16 @@ func handleLidar(w http.ResponseWriter, req *http.Request) {
 
 	if lidarCmd == "0" {
 		action = "stopped"
-		go StopLidar()
+		err := StopLidar()
+		if err != nil {
+			log.Print(err)
+		}
 	} else if lidarCmd == "1" {
 		action = "started"
-		go StartLidar()
+		err := StartLidar()
+		if err != nil {
+			log.Print(err)
+		}
 	}
 
 	fmt.Fprintln(w, action+" lidar-scan")
