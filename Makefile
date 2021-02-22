@@ -7,4 +7,4 @@ install:
 	cp ./roverd /usr/local/bin
 
 clean:
-	rm -rf ./roverd
+	rm -rf ./roverd *.log *.pid
