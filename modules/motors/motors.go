@@ -58,9 +58,8 @@ func ExecuteGoMove(move GoMove) error {
 		return fmt.Errorf("write frame to w: %v", err)
 	}
 
-	log.Printf("wrote %d bytes to port\n", n)
-
 	// TODO: add proper logging solution
+	log.Printf("wrote %d bytes to port\n", n)
 	verbose := true
 	if verbose {
 		for _, b := range f {

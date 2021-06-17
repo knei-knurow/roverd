@@ -3,6 +3,7 @@ package servos
 import (
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/knei-knurow/frames"
 )
@@ -46,17 +47,33 @@ func ExecuteTurnMove(move TurnMove) error {
 	// write front servos frame
 	data := []byte{typeByte, frontSide, frontDegrees}
 	f := frames.Create(frameHeader, data)
-	_, err := Port.Write(f)
+	n, err := Port.Write(f)
 	if err != nil {
 		return fmt.Errorf("write frame to w: %v", err)
+	}
+
+	// TODO: add proper logging solution
+	log.Printf("FRAME 1: wrote %d bytes to port\n", n)
+	verbose := true
+	if verbose {
+		for _, b := range f {
+			log.Println(frames.DescribeByte(b))
+		}
 	}
 
 	// write back servos frame
 	data = []byte{typeByte, backSide, backDegrees}
 	f = frames.Create(frameHeader, data)
-	_, err = Port.Write(f)
+	n, err = Port.Write(f)
 	if err != nil {
 		return fmt.Errorf("write frame to w: %v", err)
+	}
+
+	log.Printf("FRAME 2: wrote %d bytes to port\n", n)
+	if verbose {
+		for _, b := range f {
+			log.Println(frames.DescribeByte(b))
+		}
 	}
 
 	return nil
