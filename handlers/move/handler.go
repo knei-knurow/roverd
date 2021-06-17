@@ -23,6 +23,8 @@ func HandleMove(requestBody map[string]interface{}) error {
 		err = handleGoMove(requestBody)
 	} else if moveType == "turn" {
 		err = handleTurnMove(requestBody)
+	} else if moveType == "stop" {
+		err = handleStopMove(requestBody)
 	} else {
 		err = ErrInvalidMoveType
 	}
@@ -77,5 +79,29 @@ func handleTurnMove(m map[string]interface{}) error {
 	}
 
 	return nil
+}
 
+// HandleStopMove TODO docs
+func handleStopMove(m map[string]interface{}) error {
+	speed, ok := m["speed"].(float64)
+	if !ok {
+		log.Fatalln("failed to convert speed to float64")
+	}
+
+	direction, ok := m["direction"].(string)
+	if !ok {
+		log.Fatalln("failed to convert direction to string")
+	}
+
+	goMove := motors.GoMove{
+		Direction: direction,
+		Speed:     byte(speed), // for STOP: always should be255
+	}
+
+	err := motors.ExecuteGoMove(goMove)
+	if err != nil {
+		log.Fatalln("failed to execute go move:", err)
+	}
+
+	return nil
 }

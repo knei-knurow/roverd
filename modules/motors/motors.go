@@ -3,6 +3,7 @@ package motors
 import (
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/knei-knurow/frames"
 )
@@ -68,18 +69,20 @@ func ExecuteGoMove(move GoMove) error {
 
 	data := []byte{typeByte, directionByte, speedByte}
 	f := frames.Create([2]byte{'M', 'T'}, data)
-	_, err := Port.Write(f)
+	n, err := Port.Write(f)
 	if err != nil {
 		return fmt.Errorf("write frame to w: %v", err)
 	}
 
+	log.Printf("wrote %d bytes to port\n", n)
+
 	// TODO: add proper logging solution
-	// verbose := true
-	// if verbose {
-	// 	for _, b := range f {
-	// 		log.Println(frames.DescribeByte(b))
-	// 	}
-	// }
+	verbose := true
+	if verbose {
+		for _, b := range f {
+			log.Println(frames.DescribeByte(b))
+		}
+	}
 	return nil
 }
 
