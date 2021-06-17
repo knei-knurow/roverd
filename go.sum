@@ -1,5 +1,3 @@
-github.com/joho/godotenv v1.3.0 h1:Zjp+RcGpHhGlrMbJzXTrZZPrWj+1vfm90La1wgB6Bhc=
-github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
 github.com/knei-knurow/frames v1.0.2 h1:ySBA83u6UQI+Gsra9LBpz5wK1aT5etSjeEu2QeGFVPE=
 github.com/knei-knurow/frames v1.0.2/go.mod h1:AlSXmIiJrGroKu/4wdnk/y6AcxqSXBDb4fk61xlE/cY=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07 h1:UyzmZLoiDWMRywV4DUYb9Fbt8uiOSooupjTq10vpvnU=

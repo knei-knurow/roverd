@@ -1,7 +1,7 @@
 all: roverd
 
-roverd: ./roverd.go ./movement.go
-	go build -o roverd ./roverd.go ./movement.go
+roverd: ./roverd.go
+	go build -o roverd ./roverd.go
 
 install:
 	cp ./roverd /usr/local/bin

@@ -10,7 +10,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/joho/godotenv"
 	"github.com/knei-knurow/roverd/handlers/move"
 	"github.com/knei-knurow/roverd/modules/motors"
 	"github.com/tarm/serial"
@@ -35,14 +34,9 @@ func init() {
 	flag.BoolVar(&verbose, "verbose", false, "print verbose output")
 	flag.Parse()
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalln("failed to load .env file:", err)
-	}
-
 	port = os.Getenv("LISTEN_PORT")
+	movePortName := os.Getenv("MOVE_PORT")
 
-	movePortName := os.Getenv("MOVE_PORT_NAME")
 	baudRate, err := strconv.Atoi(os.Getenv("MOVE_BAUD_RATE"))
 	if err != nil {
 		log.Fatalf("cannot read baud rate: %v\n", err)
