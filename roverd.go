@@ -11,7 +11,8 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"github.com/knei-knurow/frames"
+	"github.com/knei-knurow/roverd/handlers/move"
+	"github.com/knei-knurow/roverd/modules/motors"
 	"github.com/tarm/serial"
 )
 
@@ -56,6 +57,8 @@ func init() {
 	if err != nil {
 		log.Fatalf("cannot open port %s: %v\n", movePortName, err)
 	}
+
+	motors.Port = movePort
 }
 
 func main() {
@@ -81,29 +84,16 @@ func handleMove(w http.ResponseWriter, req *http.Request) {
 		log.Fatalln("failed to read body:", err)
 	}
 
-	log.Printf("body: %s\n", b)
+	log.Printf("request body: %s\n", b)
 
 	m := make(map[string]interface{})
 	err = json.Unmarshal(b, &m)
 	if err != nil {
-		log.Fatalln("failed to unmarshal:", err)
+		log.Fatalln("failed to unmarshal HTTP request body into map[string]interface{}:", err)
 	}
 
-	speed, ok := m["speed"].(float64)
-	if !ok {
-		log.Fatalln("failed to convert speed to float64")
-	}
-
-	data := []byte{'G', byte(speed)}
-	f := frames.Create([2]byte{'M', 'T'}, data)
-	_, err = movePort.Write(f)
+	err = move.HandleMove(m)
 	if err != nil {
-		log.Fatalln("failed to write frame to port:", err)
-	}
-
-	if verbose {
-		for _, b := range f {
-			log.Println(frames.DescribeByte(b))
-		}
+		log.Fatalln("failed to handle move:", err)
 	}
 }
