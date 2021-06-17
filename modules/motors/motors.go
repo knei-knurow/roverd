@@ -14,9 +14,14 @@ const (
 	GoStop     = "stop"
 )
 
-// Port is a serial port to which frames will be written.
-// It must be non-nil, otherwise this won't work.
-var Port io.ReadWriter
+var (
+	// Port is a serial port to which frames will be written.
+	// It must be non-nil, otherwise this won't work. This means that
+	// you should set this as soon as possible.
+	Port io.ReadWriter
+
+	frameHeader = [2]byte{'M', 'T'}
+)
 
 // GoMove is a Move whose type is "go".
 type GoMove struct {
@@ -47,7 +52,7 @@ func ExecuteGoMove(move GoMove) error {
 	)
 
 	data := []byte{typeByte, directionByte, speedByte}
-	f := frames.Create([2]byte{'M', 'T'}, data)
+	f := frames.Create(frameHeader, data)
 	n, err := Port.Write(f)
 	if err != nil {
 		return fmt.Errorf("write frame to w: %v", err)

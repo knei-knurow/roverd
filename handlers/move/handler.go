@@ -22,10 +22,10 @@ func HandleMove(requestBody map[string]interface{}) error {
 	var err error
 	if moveType == "go" {
 		err = handleGoMove(requestBody)
-	} else if moveType == "turn" {
-		err = handleTurnMove(requestBody)
 	} else if moveType == "stop" {
 		err = handleStopMove(requestBody)
+	} else if moveType == "turn" {
+		err = handleTurnMove(requestBody)
 	} else {
 		err = ErrInvalidMoveType
 	}
@@ -64,13 +64,7 @@ func handleTurnMove(m map[string]interface{}) error {
 		log.Fatalln("failed to convert degrees to float64")
 	}
 
-	side, ok := m["degrees"].(string)
-	if !ok {
-		log.Fatalln("failed to convert side to string")
-	}
-
 	turnMove := servos.TurnMove{
-		Side:    side,
 		Degrees: byte(degrees),
 	}
 
