@@ -12,6 +12,7 @@ import (
 
 	"github.com/knei-knurow/roverd/handlers/move"
 	"github.com/knei-knurow/roverd/modules/motors"
+	"github.com/knei-knurow/roverd/modules/servos"
 	"github.com/tarm/serial"
 )
 
@@ -53,6 +54,7 @@ func init() {
 	}
 
 	motors.Port = movePort
+	servos.Port = movePort
 }
 
 func main() {

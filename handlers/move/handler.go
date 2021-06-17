@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/knei-knurow/roverd/modules/motors"
+	"github.com/knei-knurow/roverd/modules/servos"
 )
 
 var (
@@ -68,12 +69,12 @@ func handleTurnMove(m map[string]interface{}) error {
 		log.Fatalln("failed to convert side to string")
 	}
 
-	turnMove := motors.TurnMove{
+	turnMove := servos.TurnMove{
 		Side:    side,
 		Degrees: byte(degrees),
 	}
 
-	err := motors.ExecuteTurnMove(turnMove)
+	err := servos.ExecuteTurnMove(turnMove)
 	if err != nil {
 		log.Fatalln("failed to execute turn move:", err)
 	}
@@ -81,7 +82,6 @@ func handleTurnMove(m map[string]interface{}) error {
 	return nil
 }
 
-// HandleStopMove TODO docs
 func handleStopMove(m map[string]interface{}) error {
 	speed, ok := m["speed"].(float64)
 	if !ok {
