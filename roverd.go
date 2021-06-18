@@ -21,6 +21,8 @@ var (
 )
 
 var (
+	addr string
+
 	// Port on which the roverd will listen for requests
 	port string
 
@@ -35,10 +37,11 @@ func init() {
 	flag.BoolVar(&verbose, "verbose", false, "print verbose output")
 	flag.Parse()
 
-	port = os.Getenv("LISTEN_PORT")
-	movePortName := os.Getenv("MOVE_PORT")
+	addr = os.Getenv("ROVERD_LISTEN_ADDR")
+	port = os.Getenv("ROVERD_LISTEN_PORT")
+	movePortName := os.Getenv("ROVERD_MOVE_PORT")
 
-	baudRate, err := strconv.Atoi(os.Getenv("MOVE_BAUD_RATE"))
+	baudRate, err := strconv.Atoi(os.Getenv("ROVERD_MOVE_BAUD_RATE"))
 	if err != nil {
 		log.Fatalf("cannot read baud rate: %v\n", err)
 	}
@@ -66,7 +69,7 @@ func main() {
 func serveHTTP() {
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/move", handleMove)
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(addr+":"+port, nil)
 }
 
 func handleIndex(w http.ResponseWriter, req *http.Request) {
