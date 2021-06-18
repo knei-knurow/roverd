@@ -55,16 +55,30 @@ func ExecuteGoMove(move GoMove) error {
 	f := frames.Create(frameHeader, data)
 	n, err := Port.Write(f)
 	if err != nil {
-		return fmt.Errorf("write frame to w: %v", err)
+		return fmt.Errorf("write frame to port: %v", err)
 	}
 
 	// TODO: add proper logging solution
-	log.Printf("wrote %d bytes to port\n", n)
 	verbose := true
 	if verbose {
+		log.Printf("wrote %d bytes to port\n", n)
 		for _, b := range f {
 			log.Println(frames.DescribeByte(b))
 		}
 	}
+
+	resData := make([]byte, 8)
+	n, err = Port.Read(resData)
+	if err != nil {
+		return fmt.Errorf("read frame from port: %v", err)
+	}
+
+	if verbose {
+		log.Printf("read %d bytes from port\n", n)
+		for _, b := range resData {
+			log.Println(frames.DescribeByte(b))
+		}
+	}
+
 	return nil
 }
