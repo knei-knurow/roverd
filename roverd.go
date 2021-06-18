@@ -1,62 +1,75 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
+	"strconv"
 
-	"github.com/sevlyar/go-daemon"
+	"github.com/knei-knurow/roverd/handlers/move"
+	"github.com/knei-knurow/roverd/modules/motors"
+	"github.com/knei-knurow/roverd/modules/servos"
+	"github.com/tarm/serial"
 )
 
 var (
-	signals = make(chan os.Signal, 1)
+	verbose bool
 )
 
-// To terminate the daemon use:
-// kill `cat roverd.pid`
-func main() {
-	ctx := &daemon.Context{
-		PidFileName: "roverd.pid",
-		PidFilePerm: 0644,
-		LogFileName: "roverd.log",
-		LogFilePerm: 0640,
-		WorkDir:     "./",
-		Umask:       027,
-	}
+var (
+	addr string
 
-	daemon, err := ctx.Reborn()
+	// Port on which the roverd will listen for requests
+	port string
+
+	// Port with the device controlling motors
+	movePort io.ReadWriteCloser
+)
+
+func init() {
+	log.SetFlags(0)
+	log.SetPrefix("roverd: ")
+
+	flag.BoolVar(&verbose, "verbose", false, "print verbose output")
+	flag.Parse()
+
+	addr = os.Getenv("ROVERD_LISTEN_ADDR")
+	port = os.Getenv("ROVERD_LISTEN_PORT")
+	movePortName := os.Getenv("ROVERD_MOVE_PORT")
+
+	baudRate, err := strconv.Atoi(os.Getenv("ROVERD_MOVE_BAUD_RATE"))
 	if err != nil {
-		log.Fatal("unable to run: ", err)
+		log.Fatalf("cannot read baud rate: %v\n", err)
 	}
-	if daemon != nil {
-		return
+
+	config := &serial.Config{
+		Name: movePortName,
+		Baud: baudRate,
 	}
-	defer ctx.Release()
 
-	log.Print("- - - - - - - - - - - - - - -")
-	log.Print("daemon started")
+	movePort, err = serial.OpenPort(config)
+	if err != nil {
+		log.Fatalf("cannot open port %s: %v\n", movePortName, err)
+	}
 
-	signal.Notify(signals, syscall.SIGTERM, syscall.SIGINT)
-	go listenSignals()
+	motors.Port = movePort
+	servos.Port = movePort
+}
+
+func main() {
+	fmt.Println("started")
 
 	serveHTTP()
 }
 
-func listenSignals() {
-	for sig := range signals {
-		log.Printf("dameon stopped: %s", sig.String())
-		os.Exit(0)
-	}
-}
-
 func serveHTTP() {
 	http.HandleFunc("/", handleIndex)
-	http.HandleFunc("/lidar", handleLidar)
-	http.HandleFunc("/head", handleHead)
-	http.ListenAndServe("127.0.0.1:8080", nil)
+	http.HandleFunc("/move", handleMove)
+	http.ListenAndServe(addr+":"+port, nil)
 }
 
 func handleIndex(w http.ResponseWriter, req *http.Request) {
@@ -64,45 +77,22 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "hello from roverd!")
 }
 
-func handleLidar(w http.ResponseWriter, req *http.Request) {
-	lidarState := req.URL.Query().Get("state")
-
-	msg := ""
-
-	if lidarState == "0" {
-		err := StopLidar()
-		if err != nil {
-			msg = fmt.Sprint("failed to stop lidar-scan:", err)
-		} else {
-			msg = "stopped lidar-scan"
-		}
-
-	} else if lidarState == "1" {
-		pid, err := StartLidar()
-		if err != nil {
-			msg = fmt.Sprint("failed to start lidar-scan:", err)
-		} else {
-			msg = fmt.Sprintf("started lidar-scan (pid %d)", pid)
-		}
-	}
-
-	log.Print(msg)
-	fmt.Fprintln(w, msg)
-}
-
-func handleHead(w http.ResponseWriter, req *http.Request) {
-	host := req.URL.Query().Get("host")
-	port := req.URL.Query().Get("port")
-	red := req.URL.Query().Get("red")
-	green := req.URL.Query().Get("green")
-
-	msg := fmt.Sprintf("blink (red=%s, green=%s)", red, green)
-
-	err := Blink(host, port, red, green)
+func handleMove(w http.ResponseWriter, req *http.Request) {
+	b, err := io.ReadAll(req.Body)
 	if err != nil {
-		msg = fmt.Sprintln("failed to blink:", err)
+		log.Fatalln("failed to read body:", err)
 	}
 
-	log.Print(msg)
-	fmt.Fprintln(w, msg)
+	log.Printf("request body: %s\n", b)
+
+	m := make(map[string]interface{})
+	err = json.Unmarshal(b, &m)
+	if err != nil {
+		log.Fatalln("failed to unmarshal HTTP request body into map[string]interface{}:", err)
+	}
+
+	err = move.HandleMove(m)
+	if err != nil {
+		log.Fatalln("failed to handle move:", err)
+	}
 }

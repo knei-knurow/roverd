@@ -1,12 +1,10 @@
 # generated binaries
-/master
 /roverd
 
-# log files
-roverd.log
-lidar-scan.log
-log.txt
+*.exe
+.DS_Store
+.env
 
-# pid files
-roverd.pid
-lidar-scan.pid
+# log files
+*.log
+*.pid

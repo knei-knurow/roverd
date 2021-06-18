@@ -1,10 +1,9 @@
 module github.com/knei-knurow/roverd
 
-go 1.15
+go 1.16
 
 require (
-	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
-	github.com/pkg/errors v0.9.1
-	github.com/sevlyar/go-daemon v0.1.5
-	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
+	github.com/knei-knurow/frames v1.0.2
+	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
+	golang.org/x/sys v0.0.0-20210611083646-a4fc73990273 // indirect
 )

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# easily source environment variables from .env file
+# usage: "source ./src_env"
+
+cat .env | while read line; do
+    export $line
+done

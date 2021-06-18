@@ -1,8 +1,6 @@
-github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 h1:iQTw/8FWTuc7uiaSepXwyf3o52HaUYcV+Tu66S3F5GA=
-github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0/go.mod h1:1NbS8ALrpOvjt0rHPNLyCIeMtbizbir8U//inJ+zuB8=
-github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
-github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/sevlyar/go-daemon v0.1.5 h1:Zy/6jLbM8CfqJ4x4RPr7MJlSKt90f00kNM1D401C+Qk=
-github.com/sevlyar/go-daemon v0.1.5/go.mod h1:6dJpPatBT9eUwM5VCw9Bt6CdX9Tk6UWvhW3MebLDRKE=
-golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c h1:VwygUrnw9jn88c4u8GD3rZQbqrP/tgas88tPUbBxQrk=
-golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+github.com/knei-knurow/frames v1.0.2 h1:ySBA83u6UQI+Gsra9LBpz5wK1aT5etSjeEu2QeGFVPE=
+github.com/knei-knurow/frames v1.0.2/go.mod h1:AlSXmIiJrGroKu/4wdnk/y6AcxqSXBDb4fk61xlE/cY=
+github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07 h1:UyzmZLoiDWMRywV4DUYb9Fbt8uiOSooupjTq10vpvnU=
+github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
+golang.org/x/sys v0.0.0-20210611083646-a4fc73990273 h1:faDu4veV+8pcThn4fewv6TVlNCezafGoC1gM/mxQLbQ=
+golang.org/x/sys v0.0.0-20210611083646-a4fc73990273/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
