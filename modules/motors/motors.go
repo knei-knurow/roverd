@@ -1,9 +1,11 @@
 package motors
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/knei-knurow/frames"
 )
@@ -69,19 +71,37 @@ func ExecuteGoMove(move GoMove) error {
 		}
 	}
 
-	// TODO: fix possible infinite waiting. Wait for max e.g 0.5s and then fail
-	resData := make([]byte, 8)
-	n, err = Port.Read(resData)
+	ticker := time.NewTicker(time.Second)
+	c := make(chan []byte)
+
+	go ReadWithChan(Port, c)
+
+	log.Println("waiting for response frame...")
+	select {
+	case resData := <-c:
+		if verbose {
+			log.Println("got response frame...")
+			log.Println("read bytes from port:")
+			for _, b := range resData {
+				log.Println(frames.DescribeByte(b))
+			}
+		}
+	case <-ticker.C:
+		return errors.New("read timeout")
+	}
+
+	return nil
+}
+
+// ReadWithChan reads from r and sends read data on channel c when done reading.
+func ReadWithChan(r io.Reader, c chan []byte) error {
+	resData := make([]byte, 8) // TODO: make length more generic
+	_, err := r.Read(resData)
 	if err != nil {
 		return fmt.Errorf("read frame from port: %v", err)
 	}
 
-	if verbose {
-		log.Printf("read %d bytes from port\n", n)
-		for _, b := range resData {
-			log.Println(frames.DescribeByte(b))
-		}
-	}
+	c <- resData
 
 	return nil
 }
