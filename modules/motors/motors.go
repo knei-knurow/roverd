@@ -25,6 +25,8 @@ var (
 	frameHeader = [2]byte{'M', 'T'}
 )
 
+var Verbose bool
+
 // GoMove is a Move whose type is "go".
 type GoMove struct {
 	Direction string `json:"direction"`
@@ -63,45 +65,54 @@ func ExecuteGoMove(move GoMove) error {
 	// TODO: add proper logging solution
 	// TODO: verify crc using package frames
 
-	verbose := true
-	if verbose {
+	if Verbose {
 		log.Printf("wrote %d bytes to port\n", n)
 		for _, b := range f {
 			log.Println(frames.DescribeByte(b))
 		}
 	}
 
-	ticker := time.NewTicker(time.Second)
-	c := make(chan []byte)
-
-	go ReadWithChan(Port, c)
-
 	log.Println("waiting for response frame...")
-	select {
-	case resData := <-c:
-		if verbose {
-			log.Println("got response frame")
-			log.Println("read bytes from port:")
-			for _, b := range resData {
-				log.Println(frames.DescribeByte(b))
-			}
-		}
-	case <-ticker.C:
-		return errors.New("read timeout")
+	res := make([]byte, 8)
+	_, err = ReadTimeout(Port, res, time.Second)
+	if err != nil {
+
 	}
 
 	return nil
 }
 
-// ReadWithChan reads from r and sends read data on channel c when done reading.
-func ReadWithChan(r io.Reader, c chan []byte) error {
-	resData := make([]byte, 8) // TODO: make length more generic
-	_, err := r.Read(resData)
-	if err != nil {
-		return fmt.Errorf("read frame from port: %v", err)
+// ReadTimeout reads from r into buf (just like io.Read).
+// If the read operation takes more than timeout, it returns a non-nil error.
+func ReadTimeout(r io.Reader, buf []byte, timeout time.Duration) (n int, err error) {
+	type response struct {
+		n   int
+		err error
 	}
 
-	c <- resData
+	ticker := time.NewTicker(timeout)
+	c := make(chan response)
 
-	return nil
+	go func() {
+		n, err := r.Read(buf)
+		if err != nil {
+			err := fmt.Errorf("read %d bytes from port: %v", n, err)
+			c <- response{n, err}
+		}
+
+		c <- response{n, nil}
+	}()
+
+	select {
+	case res := <-c:
+		if Verbose {
+			log.Println("got response frame")
+			for _, b := range buf {
+				log.Println(frames.DescribeByte(b))
+			}
+		}
+		return res.n, res.err
+	case <-ticker.C:
+		return 0, errors.New("read timeout")
+	}
 }

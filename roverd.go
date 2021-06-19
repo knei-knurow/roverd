@@ -21,12 +21,13 @@ var (
 )
 
 var (
+	// Host on which the roverd will listen for requests. Usually empty or "localhost".
 	host string
 
-	// Port on which the roverd will listen for requests
+	// Port on which the roverd will listen for requests.
 	port string
 
-	// Port with the device controlling motors
+	// Port with the device controlling motors.
 	movePort io.ReadWriteCloser
 )
 
