@@ -59,6 +59,8 @@ func ExecuteGoMove(move GoMove) error {
 	}
 
 	// TODO: add proper logging solution
+	// TODO: verify crc using package frames
+
 	verbose := true
 	if verbose {
 		log.Printf("wrote %d bytes to port\n", n)
