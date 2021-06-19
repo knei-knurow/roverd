@@ -57,7 +57,7 @@ func ExecuteGoMove(move GoMove) error {
 
 	data := []byte{typeByte, directionByte, speedByte}
 	f := frames.Create(frameHeader, data)
-	n, err := Port.Write(f)
+	n, err := WriteTimeout(Port, f, time.Second)
 	if err != nil {
 		return fmt.Errorf("write frame to port: %v", err)
 	}
@@ -76,7 +76,7 @@ func ExecuteGoMove(move GoMove) error {
 	res := make([]byte, 8)
 	_, err = ReadTimeout(Port, res, time.Second)
 	if err != nil {
-
+		return fmt.Errorf("read frame from port: %v", err)
 	}
 
 	return nil
@@ -105,3 +105,28 @@ func ReadTimeout(r io.Reader, buf []byte, timeout time.Duration) (n int, err err
 		return 0, errors.New("read timeout")
 	}
 }
+
+// WriteTimeout writes from bug into w (just like io.Write).
+// If the write operation takes more than timeout, it returns a non-nil error.
+func WriteTimeout(w io.Writer, buf []byte, timeout time.Duration) (n int, err error) {
+	type response struct {
+		n   int
+		err error
+	}
+
+	ticker := time.NewTicker(timeout)
+	c := make(chan response)
+
+	go func() {
+		n, err := w.Write(buf)
+		c <- response{n, err}
+	}()
+
+	select {
+	case res := <-c:
+		return res.n, res.err
+	case <-ticker.C:
+		return 0, errors.New("write timeout")
+	}
+}
+
