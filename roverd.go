@@ -21,7 +21,7 @@ var (
 )
 
 var (
-	addr string
+	host string
 
 	// Port on which the roverd will listen for requests
 	port string
@@ -37,7 +37,7 @@ func init() {
 	flag.BoolVar(&verbose, "verbose", false, "print verbose output")
 	flag.Parse()
 
-	addr = os.Getenv("ROVERD_LISTEN_ADDR")
+	host = os.Getenv("ROVERD_LISTEN_HOST")
 	port = os.Getenv("ROVERD_LISTEN_PORT")
 	movePortName := os.Getenv("ROVERD_MOVE_PORT")
 
@@ -61,15 +61,16 @@ func init() {
 }
 
 func main() {
-	fmt.Println("started")
+	addr := host + ":" + port
 
-	serveHTTP()
+	log.Println("listening on", addr)
+	serveHTTP(addr)
 }
 
-func serveHTTP() {
+func serveHTTP(addr string) {
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/move", handleMove)
-	http.ListenAndServe(addr+":"+port, nil)
+	http.ListenAndServe(addr, nil)
 }
 
 func handleIndex(w http.ResponseWriter, req *http.Request) {
@@ -78,9 +79,11 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleMove(w http.ResponseWriter, req *http.Request) {
+	log.Println("new move request")
+
 	b, err := io.ReadAll(req.Body)
 	if err != nil {
-		log.Fatalln("failed to read body:", err)
+		log.Fatalln("failed to read request body:", err)
 	}
 
 	log.Printf("request body: %s\n", b)
