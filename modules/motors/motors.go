@@ -95,22 +95,11 @@ func ReadTimeout(r io.Reader, buf []byte, timeout time.Duration) (n int, err err
 
 	go func() {
 		n, err := r.Read(buf)
-		if err != nil {
-			err := fmt.Errorf("read %d bytes from port: %v", n, err)
-			c <- response{n, err}
-		}
-
-		c <- response{n, nil}
+		c <- response{n, err}
 	}()
 
 	select {
 	case res := <-c:
-		if Verbose {
-			log.Println("got response frame")
-			for _, b := range buf {
-				log.Println(frames.DescribeByte(b))
-			}
-		}
 		return res.n, res.err
 	case <-ticker.C:
 		return 0, errors.New("read timeout")
