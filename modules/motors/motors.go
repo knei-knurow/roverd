@@ -80,7 +80,7 @@ func ExecuteGoMove(move GoMove) error {
 	select {
 	case resData := <-c:
 		if verbose {
-			log.Println("got response frame...")
+			log.Println("got response frame")
 			log.Println("read bytes from port:")
 			for _, b := range resData {
 				log.Println(frames.DescribeByte(b))
