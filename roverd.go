@@ -93,6 +93,35 @@ func handleMove(w http.ResponseWriter, req *http.Request) {
 
 	err = move.HandleMove(m)
 	if err != nil {
-		log.Fatalln("failed to handle move:", err)
+		log.Println("error:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		body := make(map[string]interface{})
+		body["message"] = err.Error()
+
+		b, err := json.Marshal(body)
+		if err != nil {
+			log.Fatalln("failed to marshal json error response:", err)
+		}
+
+		_, err = w.Write(b)
+		if err != nil {
+			log.Fatalln("failed to write json error response body:", err)
+		}
+
+		return
+	}
+
+	body := make(map[string]interface{})
+	body["message"] = "success"
+
+	b, err = json.Marshal(body)
+	if err != nil {
+		log.Fatalln("failed to marshal json response:", err)
+	}
+
+	_, err = w.Write(b)
+	if err != nil {
+		log.Fatalln("failed to write json response body:", err)
 	}
 }

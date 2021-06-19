@@ -69,6 +69,7 @@ func ExecuteGoMove(move GoMove) error {
 		}
 	}
 
+	// TODO: fix possible infinite waiting. Wait for max e.g 0.5s and then fail
 	resData := make([]byte, 8)
 	n, err = Port.Read(resData)
 	if err != nil {
