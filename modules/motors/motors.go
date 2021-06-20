@@ -53,8 +53,8 @@ func ExecuteGoMove(move GoMove) error {
 	)
 
 	data := []byte{typeByte, directionByte, speedByte}
-	f := frames.Create(frameHeader, data)
-	n, err := Port.WriteTimeout(f, time.Second)
+	frame := frames.Create(frameHeader, data)
+	n, err := Port.WriteTimeout(frame, time.Second)
 	if err != nil {
 		return fmt.Errorf("write frame to port: %v", err)
 	}
@@ -63,7 +63,7 @@ func ExecuteGoMove(move GoMove) error {
 
 	if Verbose {
 		log.Printf("wrote %d bytes to port\n", n)
-		for _, b := range f {
+		for _, b := range frame {
 			log.Println(frames.DescribeByte(b))
 		}
 	}
@@ -76,6 +76,12 @@ func ExecuteGoMove(move GoMove) error {
 	_, err = Port.ReadTimeout(res, time.Second)
 	if err != nil {
 		return fmt.Errorf("read frame from port: %v", err)
+	}
+
+	frame = frames.Recreate(res)
+	ok := frames.Verify(frame)
+	if !ok {
+		return fmt.Errorf("cannot verify response frame %b", frame)
 	}
 
 	return nil

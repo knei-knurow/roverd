@@ -1,5 +1,5 @@
-github.com/knei-knurow/frames v1.0.2 h1:ySBA83u6UQI+Gsra9LBpz5wK1aT5etSjeEu2QeGFVPE=
-github.com/knei-knurow/frames v1.0.2/go.mod h1:AlSXmIiJrGroKu/4wdnk/y6AcxqSXBDb4fk61xlE/cY=
+github.com/knei-knurow/frames v1.1.0-alpha h1:p307qI+4RCnjnoYes6vQQhwyJiPbHKfxOEc0zMNVLos=
+github.com/knei-knurow/frames v1.1.0-alpha/go.mod h1:AlSXmIiJrGroKu/4wdnk/y6AcxqSXBDb4fk61xlE/cY=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07 h1:UyzmZLoiDWMRywV4DUYb9Fbt8uiOSooupjTq10vpvnU=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
 golang.org/x/sys v0.0.0-20210611083646-a4fc73990273 h1:faDu4veV+8pcThn4fewv6TVlNCezafGoC1gM/mxQLbQ=
