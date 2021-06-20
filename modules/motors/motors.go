@@ -16,9 +16,7 @@ const (
 )
 
 var (
-	// Port is a serial port to which frames will be written.
-	// It must be non-nil, otherwise this won't work. This means that
-	// you should set this as soon as possible.
+	// Port is a serial port to which frames will be written. It must be non-nil.
 	Port sercom.Serial
 
 	frameHeader = [2]byte{'M', 'T'}

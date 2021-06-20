@@ -2,25 +2,21 @@ package servos
 
 import (
 	"fmt"
-	"io"
 	"log"
+	"time"
 
 	"github.com/knei-knurow/frames"
-)
-
-const (
-	TurnLeft  = "left"
-	TurnRight = "right"
+	"github.com/knei-knurow/roverd/sercom"
 )
 
 var (
-	// Port is a serial port to which frames will be written.
-	// It must be non-nil, otherwise this won't work. This means that
-	// you should set this as soon as possible.
-	Port io.ReadWriter
+	// Port is a serial port to which frames will be written. It must be non-nil.
+	Port sercom.Serial
 
 	frameHeader = [2]byte{'M', 'T'}
 )
+
+var Verbose bool
 
 // TurnMove is a Move whose type is "turn".
 type TurnMove struct {
@@ -44,34 +40,33 @@ func ExecuteTurnMove(move TurnMove) error {
 	frontDegrees := degreesByte
 	backDegrees := 180 - degreesByte
 
-	// write front servos frame
-	data := []byte{typeByte, frontSide, frontDegrees}
-	f := frames.Create(frameHeader, data)
-	n, err := Port.Write(f)
+	// write servos frame for front wheels
+	data1 := []byte{typeByte, frontSide, frontDegrees}
+	f1 := frames.Create(frameHeader, data1)
+	n, err := Port.WriteTimeout(f1, time.Second)
 	if err != nil {
-		return fmt.Errorf("write frame to w: %v", err)
+		return fmt.Errorf("write frame to port %v", err)
 	}
 
 	// TODO: add proper logging solution
 	log.Printf("FRAME 1: wrote %d bytes to port\n", n)
-	verbose := true
-	if verbose {
-		for _, b := range f {
+	if Verbose {
+		for _, b := range f1 {
 			log.Println(frames.DescribeByte(b))
 		}
 	}
 
-	// write back servos frame
-	data = []byte{typeByte, backSide, backDegrees}
-	f = frames.Create(frameHeader, data)
-	n, err = Port.Write(f)
+	// write servos frame for back wheels
+	data2 := []byte{typeByte, backSide, backDegrees}
+	f2 := frames.Create(frameHeader, data2)
+	n, err = Port.WriteTimeout(f2, time.Second)
 	if err != nil {
-		return fmt.Errorf("write frame to w: %v", err)
+		return fmt.Errorf("write frame to port: %v", err)
 	}
 
 	log.Printf("FRAME 2: wrote %d bytes to port\n", n)
-	if verbose {
-		for _, b := range f {
+	if Verbose {
+		for _, b := range f2 {
 			log.Println(frames.DescribeByte(b))
 		}
 	}
