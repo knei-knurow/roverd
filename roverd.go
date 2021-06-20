@@ -104,7 +104,7 @@ func handleMove(w http.ResponseWriter, req *http.Request) {
 
 	err = move.HandleMove(m)
 	if err != nil {
-		log.Println("error:", err)
+		log.Println("failed to handle move:", err)
 		w.WriteHeader(http.StatusInternalServerError)
 
 		body := make(map[string]interface{})
