@@ -13,11 +13,8 @@ import (
 	"github.com/knei-knurow/roverd/handlers/move"
 	"github.com/knei-knurow/roverd/modules/motors"
 	"github.com/knei-knurow/roverd/modules/servos"
+	"github.com/knei-knurow/roverd/sercom"
 	"github.com/tarm/serial"
-)
-
-var (
-	verbose bool
 )
 
 var (
@@ -27,8 +24,16 @@ var (
 	// Port on which the roverd will listen for requests.
 	port string
 
+	// Whether to log extensive output.
+	verbose bool
+)
+
+var (
 	// Port with the device controlling motors.
-	movePort io.ReadWriteCloser
+	movePort sercom.Serial
+
+	// Port with the device controlling rangefinder.
+	// rangefinderPort sercom.Serial
 )
 
 func init() {
@@ -52,10 +57,12 @@ func init() {
 		Baud: baudRate,
 	}
 
-	movePort, err = serial.OpenPort(config)
+	p, err := serial.OpenPort(config)
 	if err != nil {
 		log.Fatalf("cannot open port %s: %v\n", movePortName, err)
 	}
+
+	movePort = sercom.SerialPort{ReadWriteCloser: p}
 
 	motors.Port = movePort
 	servos.Port = movePort
