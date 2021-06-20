@@ -13,7 +13,7 @@ import (
 	"github.com/knei-knurow/roverd/handlers/move"
 	"github.com/knei-knurow/roverd/modules/motors"
 	"github.com/knei-knurow/roverd/modules/servos"
-	"github.com/knei-knurow/roverd/sercom"
+	"github.com/knei-knurow/roverd/ports"
 	"github.com/tarm/serial"
 )
 
@@ -30,7 +30,7 @@ var (
 
 var (
 	// Port with the device controlling motors.
-	movePort sercom.Serial
+	movePort ports.Serial
 
 	// Port with the device controlling rangefinder.
 	// rangefinderPort sercom.Serial
@@ -62,7 +62,7 @@ func init() {
 		log.Fatalf("cannot open port %s: %v\n", movePortName, err)
 	}
 
-	movePort = sercom.SerialPort{ReadWriteCloser: p}
+	movePort = ports.SerialPort{ReadWriteCloser: p}
 
 	motors.Port = movePort
 	servos.Port = movePort

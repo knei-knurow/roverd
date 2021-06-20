@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/knei-knurow/frames"
-	"github.com/knei-knurow/roverd/sercom"
+	"github.com/knei-knurow/roverd/ports"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 
 var (
 	// Port is a serial port to which frames will be written. It must be non-nil.
-	Port sercom.Serial
+	Port ports.Serial
 
 	frameHeader = [2]byte{'M', 'T'}
 )
@@ -78,51 +78,3 @@ func ExecuteGoMove(move GoMove) error {
 
 	return nil
 }
-
-//// ReadTimeout reads from r into buf (just like io.Read).
-//// If the read operation takes more than timeout, it returns a non-nil error.
-//func ReadTimeout(r io.Reader, buf []byte, timeout time.Duration) (n int, err error) {
-//	type response struct {
-//		n   int
-//		err error
-//	}
-//
-//	ticker := time.NewTicker(timeout)
-//	c := make(chan response)
-//
-//	go func() {
-//		n, err := r.Read(buf)
-//		c <- response{n, err}
-//	}()
-//
-//	select {
-//	case res := <-c:
-//		return res.n, res.err
-//	case <-ticker.C:
-//		return 0, errors.New("read timeout")
-//	}
-//}
-//
-//// WriteTimeout writes from bug into w (just like io.Write).
-//// If the write operation takes more than timeout, it returns a non-nil error.
-//func WriteTimeout(w io.Writer, buf []byte, timeout time.Duration) (n int, err error) {
-//	type response struct {
-//		n   int
-//		err error
-//	}
-//
-//	ticker := time.NewTicker(timeout)
-//	c := make(chan response)
-//
-//	go func() {
-//		n, err := w.Write(buf)
-//		c <- response{n, err}
-//	}()
-//
-//	select {
-//	case res := <-c:
-//		return res.n, res.err
-//	case <-ticker.C:
-//		return 0, errors.New("write timeout")
-//	}
-//}

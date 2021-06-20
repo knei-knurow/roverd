@@ -1,4 +1,4 @@
-package sercom
+package ports
 
 import (
 	"errors"

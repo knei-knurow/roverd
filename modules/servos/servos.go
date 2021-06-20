@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/knei-knurow/frames"
-	"github.com/knei-knurow/roverd/sercom"
+	"github.com/knei-knurow/roverd/ports"
 )
 
 var (
 	// Port is a serial port to which frames will be written. It must be non-nil.
-	Port sercom.Serial
+	Port ports.Serial
 
 	frameHeader = [2]byte{'M', 'T'}
 )
