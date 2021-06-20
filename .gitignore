@@ -3,7 +3,6 @@
 .vscode/
 
 # misc files
-*.exe
 .DS_Store
 .env
 
@@ -12,4 +11,5 @@
 *.pid
 
 # generated binaries
+*.exe
 /roverd

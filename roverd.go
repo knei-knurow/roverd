@@ -43,6 +43,11 @@ func init() {
 	flag.BoolVar(&verbose, "verbose", false, "print verbose output")
 	flag.Parse()
 
+	if verbose {
+		motors.Verbose = true
+		servos.Verbose = true
+	}
+
 	host = os.Getenv("ROVERD_LISTEN_HOST")
 	port = os.Getenv("ROVERD_LISTEN_PORT")
 	movePortName := os.Getenv("ROVERD_MOVE_PORT")

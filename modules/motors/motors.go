@@ -59,7 +59,6 @@ func ExecuteGoMove(move GoMove) error {
 		return fmt.Errorf("write frame to port: %v", err)
 	}
 
-	// TODO: add proper logging solution
 	// TODO: verify crc using package frames
 
 	if Verbose {
@@ -69,7 +68,10 @@ func ExecuteGoMove(move GoMove) error {
 		}
 	}
 
-	log.Println("waiting for response frame...")
+	if Verbose {
+		log.Println("waiting for response frame...")
+	}
+
 	res := make([]byte, 8)
 	_, err = Port.ReadTimeout(res, time.Second)
 	if err != nil {

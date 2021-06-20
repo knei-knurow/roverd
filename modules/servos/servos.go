@@ -41,32 +41,31 @@ func ExecuteTurnMove(move TurnMove) error {
 	backDegrees := 180 - degreesByte
 
 	// write servos frame for front wheels
-	data1 := []byte{typeByte, frontSide, frontDegrees}
-	f1 := frames.Create(frameHeader, data1)
-	n, err := Port.WriteTimeout(f1, time.Second)
+	data := []byte{typeByte, frontSide, frontDegrees}
+	f := frames.Create(frameHeader, data)
+	n, err := Port.WriteTimeout(f, time.Second)
 	if err != nil {
 		return fmt.Errorf("write frame to port %v", err)
 	}
 
-	// TODO: add proper logging solution
-	log.Printf("FRAME 1: wrote %d bytes to port\n", n)
 	if Verbose {
-		for _, b := range f1 {
+		log.Printf("frame 1: wrote %d bytes to port\n", n)
+		for _, b := range f {
 			log.Println(frames.DescribeByte(b))
 		}
 	}
 
 	// write servos frame for back wheels
-	data2 := []byte{typeByte, backSide, backDegrees}
-	f2 := frames.Create(frameHeader, data2)
-	n, err = Port.WriteTimeout(f2, time.Second)
+	data = []byte{typeByte, backSide, backDegrees}
+	f = frames.Create(frameHeader, data)
+	n, err = Port.WriteTimeout(f, time.Second)
 	if err != nil {
 		return fmt.Errorf("write frame to port: %v", err)
 	}
 
-	log.Printf("FRAME 2: wrote %d bytes to port\n", n)
 	if Verbose {
-		for _, b := range f2 {
+		log.Printf("frame 2: wrote %d bytes to port\n", n)
+		for _, b := range f {
 			log.Println(frames.DescribeByte(b))
 		}
 	}
