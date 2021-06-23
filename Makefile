@@ -1,7 +1,7 @@
 all: roverd
 
-roverd: ./roverd.go
-	go build -o roverd ./roverd.go
+roverd: ./roverd.go ./env.go
+	go build -o roverd ./roverd.go ./env.go
 
 install:
 	cp ./roverd /usr/local/bin

@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/knei-knurow/roverd/handlers/move"
@@ -48,18 +47,21 @@ func init() {
 		servos.Verbose = true
 	}
 
-	host = os.Getenv("ROVERD_LISTEN_HOST")
-	port = os.Getenv("ROVERD_LISTEN_PORT")
-	movePortName := os.Getenv("ROVERD_MOVE_PORT")
+	env := Env{}
+	env.Load()
+	log.Printf("loaded env vars: %v\n", env)
 
-	baudRate, err := strconv.Atoi(os.Getenv("ROVERD_MOVE_BAUD_RATE"))
+	host = env.listenHost
+	port = env.listenPort
+	movePortName := env.movePort
+	movePortBaud, err := strconv.Atoi(env.movePortBaud)
 	if err != nil {
 		log.Fatalf("cannot read baud rate: %v\n", err)
 	}
 
 	config := &serial.Config{
 		Name: movePortName,
-		Baud: baudRate,
+		Baud: movePortBaud,
 	}
 
 	p, err := serial.OpenPort(config)
