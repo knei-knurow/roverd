@@ -1,0 +1,17 @@
+# when ready to use, move to /etc/systemd/system
+
+[Unit]
+Description=Knurów Rover main daemon program.
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/dev/go/roverd/roverd
+WorkingDirectory=/home/pi/dev/go/roverd
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=%n
