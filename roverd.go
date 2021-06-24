@@ -7,27 +7,32 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/knei-knurow/roverd/handlers/move"
 	"github.com/knei-knurow/roverd/modules/motors"
 	"github.com/knei-knurow/roverd/modules/servos"
+	"github.com/knei-knurow/roverd/ports"
 	"github.com/tarm/serial"
 )
 
 var (
+	// Host on which the roverd will listen for requests. Usually empty or "localhost".
+	host string
+
+	// Port on which the roverd will listen for requests.
+	port string
+
+	// Whether to log extensive output.
 	verbose bool
 )
 
 var (
-	addr string
+	// Port with the device controlling motors.
+	movePort ports.Serial
 
-	// Port on which the roverd will listen for requests
-	port string
-
-	// Port with the device controlling motors
-	movePort io.ReadWriteCloser
+	// Port with the device controlling rangefinder.
+	// rangefinderPort sercom.Serial
 )
 
 func init() {
@@ -37,39 +42,50 @@ func init() {
 	flag.BoolVar(&verbose, "verbose", false, "print verbose output")
 	flag.Parse()
 
-	addr = os.Getenv("ROVERD_LISTEN_ADDR")
-	port = os.Getenv("ROVERD_LISTEN_PORT")
-	movePortName := os.Getenv("ROVERD_MOVE_PORT")
+	if verbose {
+		motors.Verbose = true
+		servos.Verbose = true
+	}
 
-	baudRate, err := strconv.Atoi(os.Getenv("ROVERD_MOVE_BAUD_RATE"))
+	env := Env{}
+	env.Load()
+	log.Printf("loaded env vars: %v\n", env)
+
+	host = env.listenHost
+	port = env.listenPort
+	movePortName := env.movePort
+	movePortBaud, err := strconv.Atoi(env.movePortBaud)
 	if err != nil {
 		log.Fatalf("cannot read baud rate: %v\n", err)
 	}
 
 	config := &serial.Config{
 		Name: movePortName,
-		Baud: baudRate,
+		Baud: movePortBaud,
 	}
 
-	movePort, err = serial.OpenPort(config)
+	p, err := serial.OpenPort(config)
 	if err != nil {
 		log.Fatalf("cannot open port %s: %v\n", movePortName, err)
 	}
+
+	movePort = ports.SerialPort{ReadWriteCloser: p}
 
 	motors.Port = movePort
 	servos.Port = movePort
 }
 
 func main() {
-	fmt.Println("started")
+	addr := host + ":" + port
 
-	serveHTTP()
+	log.Println("listening on", addr)
+	serveHTTP(addr)
 }
 
-func serveHTTP() {
+func serveHTTP(addr string) {
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/move", handleMove)
-	http.ListenAndServe(addr+":"+port, nil)
+	http.ListenAndServe(addr, nil)
 }
 
 func handleIndex(w http.ResponseWriter, req *http.Request) {
@@ -78,9 +94,11 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleMove(w http.ResponseWriter, req *http.Request) {
+	log.Println("new move request")
+
 	b, err := io.ReadAll(req.Body)
 	if err != nil {
-		log.Fatalln("failed to read body:", err)
+		log.Fatalln("failed to read request body:", err)
 	}
 
 	log.Printf("request body: %s\n", b)
@@ -93,6 +111,35 @@ func handleMove(w http.ResponseWriter, req *http.Request) {
 
 	err = move.HandleMove(m)
 	if err != nil {
-		log.Fatalln("failed to handle move:", err)
+		log.Println("failed to handle move:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		body := make(map[string]interface{})
+		body["message"] = err.Error()
+
+		b, err := json.Marshal(body)
+		if err != nil {
+			log.Fatalln("failed to marshal json error response:", err)
+		}
+
+		_, err = w.Write(b)
+		if err != nil {
+			log.Fatalln("failed to write json error response body:", err)
+		}
+
+		return
+	}
+
+	body := make(map[string]interface{})
+	body["message"] = "success"
+
+	b, err = json.Marshal(body)
+	if err != nil {
+		log.Fatalln("failed to marshal json response:", err)
+	}
+
+	_, err = w.Write(b)
+	if err != nil {
+		log.Fatalln("failed to write json response body:", err)
 	}
 }

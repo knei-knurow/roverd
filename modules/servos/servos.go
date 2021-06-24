@@ -2,25 +2,21 @@ package servos
 
 import (
 	"fmt"
-	"io"
 	"log"
+	"time"
 
 	"github.com/knei-knurow/frames"
-)
-
-const (
-	TurnLeft  = "left"
-	TurnRight = "right"
+	"github.com/knei-knurow/roverd/ports"
 )
 
 var (
-	// Port is a serial port to which frames will be written.
-	// It must be non-nil, otherwise this won't work. This means that
-	// you should set this as soon as possible.
-	Port io.ReadWriter
+	// Port is a serial port to which frames will be written. It must be non-nil.
+	Port ports.Serial
 
 	frameHeader = [2]byte{'M', 'T'}
 )
+
+var Verbose bool
 
 // TurnMove is a Move whose type is "turn".
 type TurnMove struct {
@@ -44,33 +40,31 @@ func ExecuteTurnMove(move TurnMove) error {
 	frontDegrees := degreesByte
 	backDegrees := 180 - degreesByte
 
-	// write front servos frame
+	// write servos frame for front wheels
 	data := []byte{typeByte, frontSide, frontDegrees}
 	f := frames.Create(frameHeader, data)
-	n, err := Port.Write(f)
+	n, err := Port.WriteTimeout(f, time.Second)
 	if err != nil {
-		return fmt.Errorf("write frame to w: %v", err)
+		return fmt.Errorf("write frame to port %v", err)
 	}
 
-	// TODO: add proper logging solution
-	log.Printf("FRAME 1: wrote %d bytes to port\n", n)
-	verbose := true
-	if verbose {
+	if Verbose {
+		log.Printf("frame 1: wrote %d bytes to port\n", n)
 		for _, b := range f {
 			log.Println(frames.DescribeByte(b))
 		}
 	}
 
-	// write back servos frame
+	// write servos frame for back wheels
 	data = []byte{typeByte, backSide, backDegrees}
 	f = frames.Create(frameHeader, data)
-	n, err = Port.Write(f)
+	n, err = Port.WriteTimeout(f, time.Second)
 	if err != nil {
-		return fmt.Errorf("write frame to w: %v", err)
+		return fmt.Errorf("write frame to port: %v", err)
 	}
 
-	log.Printf("FRAME 2: wrote %d bytes to port\n", n)
-	if verbose {
+	if Verbose {
+		log.Printf("frame 2: wrote %d bytes to port\n", n)
 		for _, b := range f {
 			log.Println(frames.DescribeByte(b))
 		}

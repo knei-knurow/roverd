@@ -2,7 +2,7 @@ package move
 
 import (
 	"errors"
-	"log"
+	"fmt"
 
 	"github.com/knei-knurow/roverd/modules/motors"
 	"github.com/knei-knurow/roverd/modules/servos"
@@ -13,6 +13,7 @@ var (
 	ErrInvalidMoveType  = errors.New("invalid move type")
 )
 
+// HandleMove calls function appropriate to move type ("go" and "turn").
 func HandleMove(requestBody map[string]interface{}) error {
 	moveType, ok := requestBody["type"]
 	if !ok {
@@ -22,8 +23,6 @@ func HandleMove(requestBody map[string]interface{}) error {
 	var err error
 	if moveType == "go" {
 		err = handleGoMove(requestBody)
-	} else if moveType == "stop" {
-		err = handleStopMove(requestBody)
 	} else if moveType == "turn" {
 		err = handleTurnMove(requestBody)
 	} else {
@@ -33,16 +32,16 @@ func HandleMove(requestBody map[string]interface{}) error {
 	return err
 }
 
-// HandleGoMove handles
+// handleGoMove handles "go moves".
 func handleGoMove(m map[string]interface{}) error {
 	speed, ok := m["speed"].(float64)
 	if !ok {
-		log.Fatalln("failed to convert speed to float64")
+		return errors.New("cannot convert speed to float64")
 	}
 
 	direction, ok := m["direction"].(string)
 	if !ok {
-		log.Fatalln("failed to convert direction to string")
+		return errors.New("cannot convert direction to string")
 	}
 
 	goMove := motors.GoMove{
@@ -52,16 +51,17 @@ func handleGoMove(m map[string]interface{}) error {
 
 	err := motors.ExecuteGoMove(goMove)
 	if err != nil {
-		log.Fatalln("failed to execute go move:", err)
+		return fmt.Errorf("execute go move: %v", err)
 	}
 
 	return nil
 }
 
+// handleGoMove handles "turn moves".
 func handleTurnMove(m map[string]interface{}) error {
 	degrees, ok := m["degrees"].(float64)
 	if !ok {
-		log.Fatalln("failed to convert degrees to float64")
+		return errors.New("cannot convert degrees to float64")
 	}
 
 	turnMove := servos.TurnMove{
@@ -70,31 +70,7 @@ func handleTurnMove(m map[string]interface{}) error {
 
 	err := servos.ExecuteTurnMove(turnMove)
 	if err != nil {
-		log.Fatalln("failed to execute turn move:", err)
-	}
-
-	return nil
-}
-
-func handleStopMove(m map[string]interface{}) error {
-	speed, ok := m["speed"].(float64)
-	if !ok {
-		log.Fatalln("failed to convert speed to float64")
-	}
-
-	direction, ok := m["direction"].(string)
-	if !ok {
-		log.Fatalln("failed to convert direction to string")
-	}
-
-	goMove := motors.GoMove{
-		Direction: direction,
-		Speed:     byte(speed), // for STOP: always should be255
-	}
-
-	err := motors.ExecuteGoMove(goMove)
-	if err != nil {
-		log.Fatalln("failed to execute go move:", err)
+		return fmt.Errorf("execute turn move: %v", err)
 	}
 
 	return nil

@@ -2,10 +2,11 @@ package motors
 
 import (
 	"fmt"
-	"io"
 	"log"
+	"time"
 
 	"github.com/knei-knurow/frames"
+	"github.com/knei-knurow/roverd/ports"
 )
 
 const (
@@ -15,13 +16,13 @@ const (
 )
 
 var (
-	// Port is a serial port to which frames will be written.
-	// It must be non-nil, otherwise this won't work. This means that
-	// you should set this as soon as possible.
-	Port io.ReadWriter
+	// Port is a serial port to which frames will be written. It must be non-nil.
+	Port ports.Serial
 
 	frameHeader = [2]byte{'M', 'T'}
 )
+
+var Verbose bool
 
 // GoMove is a Move whose type is "go".
 type GoMove struct {
@@ -52,34 +53,35 @@ func ExecuteGoMove(move GoMove) error {
 	)
 
 	data := []byte{typeByte, directionByte, speedByte}
-	f := frames.Create(frameHeader, data)
-	n, err := Port.Write(f)
+	frame := frames.Create(frameHeader, data)
+	n, err := Port.WriteTimeout(frame, time.Second)
 	if err != nil {
 		return fmt.Errorf("write frame to port: %v", err)
 	}
 
-	// TODO: add proper logging solution
 	// TODO: verify crc using package frames
 
-	verbose := true
-	if verbose {
+	if Verbose {
 		log.Printf("wrote %d bytes to port\n", n)
-		for _, b := range f {
+		for _, b := range frame {
 			log.Println(frames.DescribeByte(b))
 		}
 	}
 
-	resData := make([]byte, 8)
-	n, err = Port.Read(resData)
+	if Verbose {
+		log.Println("waiting for response frame...")
+	}
+
+	res := make([]byte, 8)
+	_, err = Port.ReadTimeout(res, time.Second)
 	if err != nil {
 		return fmt.Errorf("read frame from port: %v", err)
 	}
 
-	if verbose {
-		log.Printf("read %d bytes from port\n", n)
-		for _, b := range resData {
-			log.Println(frames.DescribeByte(b))
-		}
+	frame = frames.Recreate(res)
+	ok := frames.Verify(frame)
+	if !ok {
+		return fmt.Errorf("cannot verify response frame %b", frame)
 	}
 
 	return nil
