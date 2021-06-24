@@ -1,22 +1,14 @@
-> early proof of concept
-
 # roverd
 
 Main program for Knurów Rover. Runs as a daemon.
 
 ## Usage
 
-1. Start daemon:
+The daemon can be run in 2 ways:
 
-   `$ roverd`
+1. like a normal binary
 
-2. Stop daemon:
-
-   - using SIGTERM:
-
-     `$ kill $(cat roverd.pid)`
-
-   - or just use `top`/`htop` (especially useful if `roverd.pid` file somehow doesn't exist)
+2. using [`systemd`](https://wiki.archlinux.org/title/systemd) [ask Bartek – description coming soon]
 
 ## Compiling
 
