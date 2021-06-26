@@ -8,8 +8,7 @@ WantedBy=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/home/pi/dev/go/roverd/roverd
-WorkingDirectory=/home/pi/dev/go/roverd
+ExecStart=/usr/local/bin/roverd
 Restart=always
 RestartSec=5
 StandardOutput=syslog

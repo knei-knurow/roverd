@@ -5,6 +5,7 @@
 # misc files
 .DS_Store
 .env
+env.conf
 
 # log files
 *.log
